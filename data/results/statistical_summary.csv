@@ -1,0 +1,6 @@
+object_class,center_mean,center_std,box_mean,box_std,multi_mean,multi_std,center_wins,box_wins,multi_wins,best_strategy
+airplane,0.992,0.007,1.003,0.002,0.984,0.019,2,6,2,Bounding Box
+building,0.982,0.005,1.011,0.003,0.989,0.005,0,10,0,Bounding Box
+ship,0.993,0.008,1.000,0.003,0.994,0.015,2,5,3,Bounding Box
+storage_tank,1.010,0.007,1.011,0.004,0.997,0.009,5,4,1,Bounding Box
+vehicle,0.981,0.007,0.986,0.006,0.978,0.008,0,10,0,Bounding Box
