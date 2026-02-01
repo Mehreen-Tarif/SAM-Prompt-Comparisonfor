@@ -1,6 +1,0 @@
-MIT License
-
-Copyright (c) 2024 Mehreen Tarif
-
-Permission is hereby granted...
-[You can fill this properly later]
