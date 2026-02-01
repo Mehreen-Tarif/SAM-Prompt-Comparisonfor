@@ -84,3 +84,12 @@ git clone https://github.com/your-username/SAM-RemoteSensing-Prompt-Study.git
 
 cd SAM-RemoteSensing-Prompt-Study
 
+## Clone with SSH (recommended if HTTPS fails):
+```bash
+git clone git@github.com:Mehreen-Tarif/SAM-Prompt-Comparison-.git
+
+HTTPS: https://github.com/Mehreen-Tarif/SAM-Prompt-Comparison-.git
+
+SSH: git@github.com:Mehreen-Tarif/SAM-Prompt-Comparison-.git
+
+
