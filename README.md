@@ -1,105 +1,101 @@
-# SAM Experiment on iSAID Dataset
+\# 🛰️ SAM Remote Sensing Prompt Study
 
-This repository contains code for experimenting with Segment Anything Model (SAM) on the iSAID aerial imagery dataset.
 
-## ?? Project Overview
 
-* Evaluate SAM's zero-shot performance on iSAID dataset
-* Experiment with different prompting strategies
-* Generate comprehensive analysis and paper figures
+<div align="center">
 
-## ?? Quick Start
 
-### 1\. Clone Repository
 
-\\\\ash
-git clone https://github.com/Mehreen-Tarif/SAM-Prompt-Comparison-.git
-cd SAM-Prompt-Comparison-
-\\\\
+\[!\[Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
-### 2\. Install Dependencies
+\[!\[License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-\\\\ash
-pip install -r requirements.txt
-\\\\
 
-### 3\. Quick Test
 
-\\\\ash
-python simple\_sam\_test.py
-\\  
-*(Uses test\_small.jpg included in repository)*
+\*\*Official code for: "Optimal Prompt Strategy Selection for Segment Anything Model in Remote Sensing"\*\*
 
-## ?? Full Experiment Setup
 
-### 1\. Download iSAID Dataset
 
-* Register at [iSAID Official Website](https://captain-whu.github.io/iSAID/)
-* Download the dataset (~10GB)
-* Extract to: \\data/iSAID/\\
+\*First comprehensive comparison of SAM prompt strategies on aerial imagery\*
 
-### 2\. Download SAM Weights
 
-\\\\ash
 
-# SAM Base model (375MB)
+</div>
 
-wget https://dl.fbaipublicfiles.com/segment\_anything/sam\_vit\_b\_01ec64.pth -P models/
-\\\\
 
-### 3\. Expected Structure
 
-\\  
-My\_SAM\_Project/
- data/
-    iSAID/
-        train/
-           images/
-           masks/
-        val/
-           images/
-           masks/
-        test/
-            images/
- models/
-    sam\_vit\_b\_01ec64.pth
- \[all code files]
-\\\\
+---
 
-### 4\. Run Complete Experiment
 
-\\\\ash
-python complete\_experiment.py
-\\\\
 
-## ?? Main Scripts
+\## 📖 \*\*What This Project Does\*\*
 
-* \\complete\_experiment.py\\ - Run full experiment pipeline
-* &nbsp; 
-  eal\_isaid\_experiment.py\\ - Main experiment on iSAID
-* &nbsp; 
-  un\_\*.py\\ - Various experiment runners
-* \\generate\_paper\_materials.py\\ - Generate figures/tables for paper
 
-## ?? Repository Structure
 
-* \\scripts/\\ - Utility scripts for data processing
-* \\	est\_small.jpg\\ - Sample image for testing
-* \\	able\_results.tex\\ - LaTeX table for paper results
+This repository contains code for our research paper that answers a simple but important question:
 
-## ?? Citation
 
-If you use this code, please cite:
-\\\\ibtex
-@article{iSAID2019,
-title={iSAID: A Large-scale Dataset for Instance Segmentation in Aerial Images},
-author={Zamir, Syed Waqas and Arora, Aditya and Gupta, Akshita and Khan, Salman and Sun, Guolei and Khan, Fahad Shahbaz and Zhu, Fan and Shao, Ling},
-journal={CVPRW},
-year={2019}
-}
-\\\\
 
-## ?? License
+> \*\*"What's the BEST way to tell SAM what to segment in satellite/aerial images?"\*\*
 
-MIT License
+
+
+We tested 7 different ways (called "prompts") and found that \*\*bounding boxes are 11× better than points\*\*! 🎯
+
+
+
+| Prompt Type | Mean IoU | Speed | Best For |
+
+|------------|----------|-------|----------|
+
+| 🟦 \*\*Bounding Box\*\* | \*\*0.4594\*\* | ⚡ 8.8ms | Everything! |
+
+| 🔵 Box + Center | 0.4439 | 9.8ms | Complex shapes |
+
+| 🔴 10 Points | 0.1999 | 9.5ms | Simple objects |
+
+| ⚫ 5 Points | 0.0712 | 9.7ms | Testing only |
+
+| ⚪ 3 Points | 0.0486 | 12.6ms | Testing only |
+
+| ✳️ Corners + Center | 0.0426 | 9.3ms | Testing only |
+
+| ● Center Point | 0.0403 | 33.8ms | Testing only |
+
+
+
+\*Table: Bounding boxes are clearly the winner!\*
+
+
+
+---
+
+
+
+\## 🚀 \*\*Quick Start (5 Minutes)\*\*
+
+
+
+\### 1. \*\*Clone Repository\*\*
+
+```bash
+
+git clone https://github.com/your-username/SAM-RemoteSensing-Prompt-Study.git
+
+cd SAM-RemoteSensing-Prompt-Study
+
+
+
+
+## Clone with SSH (recommended if HTTPS fails):
+```bash
+git clone git@github.com:Mehreen-Tarif/SAM-Prompt-Comparison-.git
+
+HTTPS: https://github.com/Mehreen-Tarif/SAM-Prompt-Comparison-.git
+
+SSH: git@github.com:Mehreen-Tarif/SAM-Prompt-Comparison-.git
+
+
+If you get "Connection was reset" error, use SSH instead of HTTPS.
+
 
