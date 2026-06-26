@@ -1,102 +1,270 @@
-SAM Prompt Strategy Comparison on iSAID
-Code and data release for the paper:
-"Segment Anything Model for Remote Sensing Instance Segmentation: Systematic Prompt Strategy Evaluation and Bounding Box Superiority on iSAID"
-Mehreen Tarif, Wu Xu, Sana Abbas  
-College of Computer Science and Cyber Security  
-Chengdu University of Technology, China
-Submitted to IEEE Geoscience and Remote Sensing Letters (GRSL), 2026
+# SAM Prompt Strategy Comparison on iSAID
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-EE4C2C.svg)](https://pytorch.org/)
+[![SAM](https://img.shields.io/badge/SAM-ViT--H-green.svg)](https://github.com/facebookresearch/segment-anything)
+[![Paper](https://img.shields.io/badge/Paper-GRSL%202026-red.svg)](#citation)
+
+> Code and data release for the paper:
+> **"Segment Anything Model for Remote Sensing Instance Segmentation: Systematic Prompt Strategy Evaluation and Bounding Box Superiority on iSAID"**
+>
+> Mehreen Tarif, Wu Xu, Sana Abbas
+> College of Computer Science and Cyber Security, Chengdu University of Technology, China
+>
+> Submitted to *IEEE Geoscience and Remote Sensing Letters* (GRSL), 2026
+
 ---
-Overview
-This repository contains the experimental framework for evaluating seven prompt configurations of the Segment Anything Model (SAM) on the iSAID aerial imagery benchmark. The main finding is that box-based prompts substantially outperform point-based prompts, with Box-plus-Center (BPC) achieving 0.432 mIoU compared to 0.111 for Center Point (Cohen's d = 1.49, p < 0.001 after Bonferroni correction).
-Key Results
-Strategy	mIoU	95% CI	F1
-BPC (Box-plus-Center)	0.433	[0.405, 0.461]	0.598
-BB (Bounding Box)	0.374	[0.347, 0.402]	0.510
-MP10 (Multi-Point 10)	0.154	[0.136, 0.173]	0.272
-MP5 (Multi-Point 5)	0.135	[0.119, 0.152]	0.244
-MP3 (Multi-Point 3)	0.122	[0.108, 0.137]	0.224
-CP (Center Point)	0.112	[0.098, 0.127]	0.211
-CPC (Corner-Points + Center)	0.099	[0.087, 0.112]	0.182
-Evaluation: 333 iSAID instances across 15 categories, 2,331 SAM inferences, SAM ViT-H at 1024x1024 resolution, fixed random seed = 42.
-Repository Structure
+
+## 📋 Table of Contents
+
+- [Overview](#-overview)
+- [Key Findings](#-key-findings)
+- [Results](#-results)
+- [Repository Structure](#-repository-structure)
+- [Installation](#-installation)
+- [Quick Start](#-quick-start)
+- [Reproducing Results](#-reproducing-results)
+- [Citation](#-citation)
+- [Contact](#-contact)
+- [License](#-license)
+
+---
+
+## 🎯 Overview
+
+This repository contains the complete experimental framework for evaluating **seven prompt configurations** of the Segment Anything Model (SAM) on the iSAID aerial imagery benchmark. We provide a systematic comparison under a controlled, zero-shot protocol with statistical rigor.
+
+The main finding is that **box-based prompts substantially outperform point-based prompts** for aerial instance segmentation:
+
+| Prompt Type | mIoU | Cohen's d |
+|:-----------:|:----:|:---------:|
+| Box-plus-Center (BPC) | **0.432** | — |
+| Bounding Box (BB) | 0.374 | 0.44 vs BPC |
+| Center Point (CP) | 0.111 | 1.49 vs BPC |
+
+---
+
+## 🔬 Key Findings
+
+1. **BPC outperforms CP by 0.321 mIoU** (Cohen's d = 1.49, p < 0.001 after Bonferroni correction)
+2. **Box-versus-point ordering is robust** across:
+   - SAM backbone scales (ViT-H and ViT-B)
+   - Input resolutions (512, 768, 1024 px)
+   - Bounding-box coordinate noise up to ±10 pixels
+3. **Zero-shot SAM-BPC achieves 38.7% IoU ≥ 0.5 rate**, placing it within the published mAP@0.5 range of supervised baselines (32.3%–47.3%) without using any iSAID training data
+4. **Effect originates in prompt content**, not mask selection (oracle selection only raises CP from 0.111 to 0.169)
+
+---
+
+## 📊 Results
+
+### Per-Strategy Performance
+
+Evaluation on 333 iSAID instances across 15 categories, 2,331 SAM inferences, ViT-H at 1024×1024, seed = 42.
+
+| Strategy | mIoU | 95% CI | Precision | Recall | F1 | Time (ms) |
+|:---------|:----:|:------:|:---------:|:------:|:--:|:---------:|
+| **BPC** | **0.433** | [0.405, 0.461] | 0.751 | 0.552 | 0.598 | 13.17 |
+| BB | 0.374 | [0.347, 0.402] | 0.758 | 0.444 | 0.510 | 12.45 |
+| MP10 | 0.154 | [0.136, 0.173] | 0.183 | 0.831 | 0.272 | 12.89 |
+| MP5 | 0.135 | [0.119, 0.152] | 0.158 | 0.838 | 0.244 | 12.67 |
+| MP3 | 0.122 | [0.108, 0.137] | 0.144 | 0.847 | 0.224 | 12.23 |
+| CP | 0.112 | [0.098, 0.127] | 0.131 | 0.852 | 0.211 | 31.17 |
+| CPC | 0.099 | [0.087, 0.112] | 0.108 | 0.847 | 0.182 | 12.78 |
+
+### Statistical Comparisons
+
+All eight pairwise comparisons reach the Bonferroni-corrected threshold (p < 0.001):
+
+| Comparison | Δ IoU | Cohen's d | Magnitude |
+|:----------|:-----:|:---------:|:---------:|
+| BPC vs CPC | +0.334 | **1.56** | Very large |
+| BPC vs CP | +0.322 | **1.49** | Very large |
+| BPC vs MP3 | +0.313 | **1.41** | Very large |
+| BPC vs MP10 | +0.283 | **1.15** | Large |
+| BB vs CP | +0.259 | **1.09** | Large |
+| BB vs MP3 | +0.250 | **1.03** | Large |
+| BB vs MP10 | +0.221 | **0.84** | Large |
+| BPC vs BB | +0.063 | **0.44** | Small-Medium |
+
+### IoU Distribution Heatmap
+
+![IoU Distribution](iou_distribution_heatmap.png)
+
+---
+
+## 📁 Repository Structure
+
 ```
 SAM-Prompt-Comparisonfor/
-├── README.md                       # This file
-├── master_experiment.py            # Main experiment script
-├── build_fig12_clean.py            # Qualitative figure generation
-├── requirements.txt                # Python dependencies
-├── results/                        # Pre-computed results
-│   ├── raw_results_full15.csv
-│   ├── Table_II_Overall.csv
-│   ├── Table_III_Stats.csv
-│   ├── Ablation_A1_Backbone.csv
-│   ├── Ablation_A2_Resolution.csv
-│   └── Ablation_A3_BoxNoise.csv
-└── figures/                        # Paper figures
+│
+├── 📄 README.md                       # This file
+├── 📄 LICENSE                         # MIT License
+├── 📄 requirements.txt                # Python dependencies
+│
+├── 📂 scripts/                        # Main experiment scripts
+│   ├── SAM_FINAL_EXPERIMENT.py        # Main experiment runner
+│   ├── SAM_ABLATION.py                # Ablation studies
+│   ├── statistical_analysis.py        # Cohen's d, Bonferroni, bootstrap
+│   └── create_paper_figures.py        # Generate paper figures
+│
+├── 📂 experiments/                    # Experiment configurations
+├── 📂 experiment_results/             # Per-experiment outputs
+├── 📂 results/                        # Aggregated results & CSVs
+├── 📂 figures/                        # Paper figures
+├── 📂 utils/                          # Helper utilities
+├── 📂 data/                           # Data preparation scripts
+└── 📂 sample_data/iSAID_sample/       # Sample data for testing
 ```
-Setup
-Requirements
-Python 3.8+
-CUDA-capable GPU (RTX 3090 used in paper)
-About 20 GB disk space for iSAID dataset
-Installation
+
+---
+
+## ⚙️ Installation
+
+### Prerequisites
+
+- **Python 3.8+**
+- **CUDA-capable GPU** (RTX 3090 used in paper; ViT-H needs ~16 GB VRAM)
+- **~20 GB disk space** for the iSAID dataset
+- **iSAID dataset** annotations (see below)
+
+### Step 1: Clone the repository
+
 ```bash
 git clone https://github.com/Mehreen-Tarif/SAM-Prompt-Comparisonfor.git
 cd SAM-Prompt-Comparisonfor
+```
 
-pip install torch torchvision
-pip install opencv-python pandas numpy tqdm
+### Step 2: Install Python dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+Or manually:
+
+```bash
+pip install torch torchvision opencv-python pandas numpy tqdm
 pip install pycocotools matplotlib scipy
 pip install git+https://github.com/facebookresearch/segment-anything.git
 ```
-Download SAM checkpoints
+
+### Step 3: Download SAM checkpoints
+
 ```bash
+# ViT-H (used in main experiments)
 wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
+
+# ViT-B (used in backbone ablation)
 wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth
 ```
-Download iSAID dataset
-iSAID is available at https://captain-whu.github.io/iSAID/
-Download train and val splits with COCO-format annotations.
-Running the Experiments
-Update the BASE path at the top of master_experiment.py to point to your local iSAID directory, then run:
+
+### Step 4: Download iSAID dataset
+
+Visit the official iSAID page: **https://captain-whu.github.io/iSAID/**
+
+Download train and val splits with COCO-format annotations. Place them in the `data/` folder.
+
+---
+
+## 🚀 Quick Start
+
+### Run the full experiment
+
 ```bash
-python master_experiment.py
+python SAM_FINAL_EXPERIMENT.py
 ```
-This will run:
-Phase 1: Build experiment plan (333 instances, 15 categories)
-Phase 2: Main experiment (7 strategies x 333 instances)
-Phase 3: Ablation A1 (ViT-H vs ViT-B backbone)
-Phase 4: Ablation A2 (Resolution 512/768/1024)
-Phase 5: Ablation A3 (Bounding box noise)
-Phase 6: Statistical analysis
-Expected runtime: 75-90 minutes on RTX 3090.
-The script is resumable. If interrupted, re-run and it continues from the last checkpoint.
-Reproducing the Paper's Results
-After running master_experiment.py, the output CSVs match the numbers reported in the paper:
-Table II in the paper matches Table_II_Overall.csv
-Table III in the paper matches Table_III_Stats.csv
-Ablation A1/A2/A3 match Section IV-C of the paper
-Fixed random seed (42) ensures reproducibility across runs.
-Sampling Note
-The 333 evaluation instances are the 25 largest instances per category. This choice ensures prompt-mask correspondence is meaningful and visible. Performance on smaller or occluded instances may differ. See the Limitations section of the paper for discussion.
-Citation
-If you use this code or build on this work, please cite:
+
+This runs all six phases of the experiment:
+
+| Phase | Description | Output |
+|:-----:|:-----------|:-------|
+| 1 | Build experiment plan (333 instances, 15 categories) | `experiment_plan.json` |
+| 2 | Main experiment (7 strategies × 333 instances) | `raw_results_full15.csv` |
+| 3 | Ablation A1: Backbone (ViT-H vs ViT-B) | `Ablation_A1_Backbone.csv` |
+| 4 | Ablation A2: Resolution (512/768/1024) | `Ablation_A2_Resolution.csv` |
+| 5 | Ablation A3: Bounding box noise | `Ablation_A3_BoxNoise.csv` |
+| 6 | Statistical analysis (Bonferroni, Cohen's d, bootstrap) | `Table_II_Overall.csv`, `Table_III_Stats.csv` |
+
+**Expected runtime:** 75–90 minutes on RTX 3090.
+
+> 💡 **Note:** The script is resumable. If interrupted, just re-run and it continues from the last checkpoint.
+
+### Generate paper figures
+
+```bash
+python create_paper_figures.py
 ```
+
+---
+
+## 🔄 Reproducing Results
+
+All results in the paper are reproducible with the fixed random seed (42).
+
+After running `SAM_FINAL_EXPERIMENT.py`, the following CSVs match the numbers in the paper:
+
+| Paper Reference | CSV File |
+|:----------------|:---------|
+| Table II (Per-Strategy Performance) | `results/Table_II_Overall.csv` |
+| Table III (Statistical Comparisons) | `results/Table_III_Stats.csv` |
+| Section IV-C, Ablation A1 | `results/Ablation_A1_Backbone.csv` |
+| Section IV-C, Ablation A2 | `results/Ablation_A2_Resolution.csv` |
+| Section IV-C, Ablation A3 | `results/Ablation_A3_BoxNoise.csv` |
+
+### Sampling Note
+
+The 333 evaluation instances are the **25 largest instances per category**. This choice ensures prompt-mask correspondence is meaningful and visible. Performance on smaller or occluded instances may differ. See the Limitations section of the paper for further discussion.
+
+---
+
+## 📝 Citation
+
+If you use this code or build on this work, please cite our paper:
+
+```bibtex
 @article{tarif2026sam,
-  title={Segment Anything Model for Remote Sensing Instance Segmentation: 
-         Systematic Prompt Strategy Evaluation and Bounding Box Superiority on iSAID},
-  author={Tarif, Mehreen and Xu, Wu and Abbas, Sana},
-  journal={IEEE Geoscience and Remote Sensing Letters},
-  year={2026},
-  note={Submitted}
+  title   = {Segment Anything Model for Remote Sensing Instance Segmentation:
+             Systematic Prompt Strategy Evaluation and Bounding Box Superiority on iSAID},
+  author  = {Tarif, Mehreen and Xu, Wu and Abbas, Sana},
+  journal = {IEEE Geoscience and Remote Sensing Letters},
+  year    = {2026},
+  note    = {Submitted}
 }
 ```
-Acknowledgments
-iSAID benchmark by the CAPTAIN laboratory, Wuhan University
-Segment Anything Model by Meta AI Research
-DOTA dataset (which iSAID builds upon)
-Contact
-First author (Mehreen Tarif): mehreentarif17@gmail.com
-Corresponding author (Wu Xu): wuxu2022@cdut.edu.cn
-License
-This code is released for research and reproducibility purposes. Please contact the authors before commercial use.
+
+---
+
+## 🙏 Acknowledgments
+
+- **[iSAID benchmark](https://captain-whu.github.io/iSAID/)** by the CAPTAIN laboratory, Wuhan University
+- **[Segment Anything Model](https://github.com/facebookresearch/segment-anything)** by Meta AI Research
+- **[DOTA dataset](https://captain-whu.github.io/DOTA/)** (which iSAID builds upon)
+
+---
+
+## 📧 Contact
+
+| Role | Name | Email |
+|:-----|:-----|:------|
+| First Author | Mehreen Tarif | mehreentarif17@gmail.com |
+| Corresponding Author | Wu Xu | wuxu2022@cdut.edu.cn |
+
+For questions about the code or paper, please open an [Issue](https://github.com/Mehreen-Tarif/SAM-Prompt-Comparisonfor/issues) or contact the authors directly.
+
+---
+
+## 📜 License
+
+This code is released under the [MIT License](LICENSE) for research and reproducibility purposes.
+
+---
+
+<div align="center">
+
+**⭐ If you find this work useful, please consider starring the repository! ⭐**
+
+Made with ❤️ at Chengdu University of Technology
+
+</div>
