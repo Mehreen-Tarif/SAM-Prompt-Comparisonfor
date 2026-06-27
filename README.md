@@ -19,6 +19,7 @@
 ## 📋 Table of Contents
 
 - [Overview](#-overview)
+- [Why Prompt Choice Matters](#-why-prompt-choice-matters)
 - [Key Findings](#-key-findings)
 - [Results](#-results)
 - [Repository Structure](#-repository-structure)
@@ -45,6 +46,16 @@ The main finding is that **box-based prompts substantially outperform point-base
 
 ---
 
+## 🖼️ Why Prompt Choice Matters
+
+The same SAM ViT-H model on the same iSAID image produces **dramatically different results** depending on the prompt:
+
+![Motivation Teaser](figures/Fig1_Motivation_Teaser.png)
+
+A centroid prompt yields IoU = 0.0012, while a bounding box prompt on the same image yields IoU = 0.8197. **Same model, same image, different prompt.**
+
+---
+
 ## 🔬 Key Findings
 
 1. **BPC outperforms CP by 0.321 mIoU** (Cohen's d = 1.49, p < 0.001 after Bonferroni correction)
@@ -63,6 +74,8 @@ The main finding is that **box-based prompts substantially outperform point-base
 
 Evaluation on 333 iSAID instances across 15 categories, 2,331 SAM inferences, ViT-H at 1024×1024, seed = 42.
 
+![Strategy Comparison](figures/Fig4_Strategy_Comparison.png)
+
 | Strategy | mIoU | 95% CI | Precision | Recall | F1 | Time (ms) |
 |:---------|:----:|:------:|:---------:|:------:|:--:|:---------:|
 | **BPC** | **0.433** | [0.405, 0.461] | 0.751 | 0.552 | 0.598 | 13.17 |
@@ -72,6 +85,12 @@ Evaluation on 333 iSAID instances across 15 categories, 2,331 SAM inferences, Vi
 | MP3 | 0.122 | [0.108, 0.137] | 0.144 | 0.847 | 0.224 | 12.23 |
 | CP | 0.112 | [0.098, 0.127] | 0.131 | 0.852 | 0.211 | 31.17 |
 | CPC | 0.099 | [0.087, 0.112] | 0.108 | 0.847 | 0.182 | 12.78 |
+
+### Confidence vs IoU
+
+SAM's self-predicted confidence does not correlate well with actual IoU under point prompts. Box-based strategies sit in the high-IoU region with moderate confidence.
+
+![Confidence vs IoU](figures/Fig5_Confidence_IoU.png)
 
 ### Statistical Comparisons
 
@@ -109,10 +128,14 @@ SAM-Prompt-Comparisonfor/
 │   ├── statistical_analysis.py        # Cohen's d, Bonferroni, bootstrap
 │   └── create_paper_figures.py        # Generate paper figures
 │
+├── 📂 figures/                        # Paper figures
+│   ├── Fig1_Motivation_Teaser.png
+│   ├── Fig4_Strategy_Comparison.png
+│   └── Fig5_Confidence_IoU.png
+│
 ├── 📂 experiments/                    # Experiment configurations
 ├── 📂 experiment_results/             # Per-experiment outputs
 ├── 📂 results/                        # Aggregated results & CSVs
-├── 📂 figures/                        # Paper figures
 ├── 📂 utils/                          # Helper utilities
 ├── 📂 data/                           # Data preparation scripts
 └── 📂 sample_data/iSAID_sample/       # Sample data for testing
