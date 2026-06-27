@@ -16,19 +16,32 @@
 
 ---
 
+## ⭐ Primary Scripts (Start Here)
+
+To reproduce the paper's results, use these primary scripts:
+
+| Script | Purpose |
+|:-------|:--------|
+| **`SAM_FINAL_EXPERIMENT.py`** | 🎯 Main experiment runner (all 7 strategies × 333 instances) |
+| **`SAM_ABLATION.py`** | Ablation studies (backbone, resolution, noise) |
+| **`statistical_analysis.py`** | Cohen's d, Bonferroni correction, bootstrap CIs |
+| **`create_paper_figures.py`** | Generate paper figures (Fig 1, 4, 5) |
+
+> 💡 The repository also contains earlier exploration scripts kept for transparency about the development process. The four primary scripts above are sufficient to reproduce all results in the paper.
+
+---
+
 ## 📋 Table of Contents
 
 - [Overview](#-overview)
 - [Why Prompt Choice Matters](#-why-prompt-choice-matters)
 - [Key Findings](#-key-findings)
 - [Results](#-results)
-- [Repository Structure](#-repository-structure)
 - [Installation](#-installation)
 - [Quick Start](#-quick-start)
 - [Reproducing Results](#-reproducing-results)
 - [Citation](#-citation)
 - [Contact](#-contact)
-- [License](#-license)
 
 ---
 
@@ -119,35 +132,6 @@ All eight pairwise comparisons reach the Bonferroni-corrected threshold (p < 0.0
 
 ---
 
-## 📁 Repository Structure
-
-```
-SAM-Prompt-Comparisonfor/
-│
-├── 📄 README.md                       # This file
-├── 📄 LICENSE                         # MIT License
-├── 📄 requirements.txt                # Python dependencies
-│
-├── 📂 scripts/                        # Main experiment scripts
-│   ├── SAM_FINAL_EXPERIMENT.py        # Main experiment runner
-│   ├── SAM_ABLATION.py                # Ablation studies
-│   ├── statistical_analysis.py        # Cohen's d, Bonferroni, bootstrap
-│   └── create_paper_figures.py        # Generate paper figures
-│
-├── 📂 experiments/                    # Experiment configurations
-├── 📂 experiment_results/             # Per-experiment outputs
-├── 📂 results/                        # Aggregated results & CSVs
-├── 📂 figures/                        # Paper figures
-│   ├── Fig1_Motivation_Teaser.png
-│   ├── Fig4_Strategy_Comparison.png
-│   └── Fig5_Confidence_IoU.png
-├── 📂 utils/                          # Helper utilities
-├── 📂 data/                           # Data preparation scripts
-└── 📂 sample_data/iSAID_sample/       # Sample data for testing
-```
-
----
-
 ## ⚙️ Installation
 
 ### Prerequisites
@@ -155,7 +139,6 @@ SAM-Prompt-Comparisonfor/
 - **Python 3.8+**
 - **CUDA-capable GPU** (RTX 3090 used in paper; ViT-H needs ~16 GB VRAM)
 - **~20 GB disk space** for the iSAID dataset
-- **iSAID dataset** annotations (see below)
 
 ### Step 1: Clone the repository
 
@@ -185,13 +168,29 @@ Visit the official iSAID page: **https://captain-whu.github.io/iSAID/**
 
 ## 🚀 Quick Start
 
+To reproduce all results in the paper, run the main experiment script:
+
 ```bash
 python SAM_FINAL_EXPERIMENT.py
 ```
 
-This runs all six phases of the experiment. **Expected runtime:** 75–90 minutes on RTX 3090.
+This runs all six phases:
+- Phase 1: Build experiment plan (333 instances, 15 categories)
+- Phase 2: Main experiment (7 strategies × 333 instances)
+- Phase 3: Ablation A1 (ViT-H vs ViT-B backbone)
+- Phase 4: Ablation A2 (Resolution: 512/768/1024)
+- Phase 5: Ablation A3 (Bounding box noise)
+- Phase 6: Statistical analysis (Bonferroni, Cohen's d, bootstrap)
+
+**Expected runtime:** 75–90 minutes on RTX 3090.
 
 > 💡 **Note:** The script is resumable. If interrupted, just re-run and it continues from the last checkpoint.
+
+### Generate paper figures
+
+```bash
+python create_paper_figures.py
+```
 
 ---
 
@@ -207,9 +206,15 @@ All results in the paper are reproducible with the fixed random seed (42).
 | Section IV-C, Ablation A2 | `results/Ablation_A2_Resolution.csv` |
 | Section IV-C, Ablation A3 | `results/Ablation_A3_BoxNoise.csv` |
 
+### Sampling Note
+
+The 333 evaluation instances are the **25 largest instances per category**. This choice ensures prompt-mask correspondence is meaningful and visible. Performance on smaller or occluded instances may differ. See the Limitations section of the paper for further discussion.
+
 ---
 
 ## 📝 Citation
+
+If you use this code or build on this work, please cite our paper:
 
 ```bibtex
 @article{tarif2026sam,
@@ -228,7 +233,7 @@ All results in the paper are reproducible with the fixed random seed (42).
 
 - **[iSAID benchmark](https://captain-whu.github.io/iSAID/)** by the CAPTAIN laboratory, Wuhan University
 - **[Segment Anything Model](https://github.com/facebookresearch/segment-anything)** by Meta AI Research
-- **[DOTA dataset](https://captain-whu.github.io/DOTA/)**
+- **[DOTA dataset](https://captain-whu.github.io/DOTA/)** (which iSAID builds upon)
 
 ---
 
@@ -239,11 +244,13 @@ All results in the paper are reproducible with the fixed random seed (42).
 | First Author | Mehreen Tarif | mehreentarif17@gmail.com |
 | Corresponding Author | Wu Xu | wuxu2022@cdut.edu.cn |
 
+For questions about the code or paper, please open an [Issue](https://github.com/Mehreen-Tarif/SAM-Prompt-Comparisonfor/issues) or contact the authors directly.
+
 ---
 
 ## 📜 License
 
-MIT License — see [LICENSE](LICENSE) file.
+This code is released under the [MIT License](LICENSE) for research and reproducibility purposes.
 
 ---
 
