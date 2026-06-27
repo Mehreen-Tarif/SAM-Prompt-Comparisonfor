@@ -48,11 +48,13 @@ The main finding is that **box-based prompts substantially outperform point-base
 
 ## 🖼️ Why Prompt Choice Matters
 
-The same SAM ViT-H model on the same iSAID image produces **dramatically different results** depending on the prompt:
+The same SAM ViT-H model on the same iSAID image produces dramatically different results depending on prompt type:
 
-![Motivation Teaser](figures/Fig1_Motivation_Teaser.png)
+<p align="center">
+<img src="figures/Fig1_Motivation_Teaser.png" alt="Motivation: Why prompt choice matters" width="80%"/>
+</p>
 
-A centroid prompt yields IoU = 0.0012, while a bounding box prompt on the same image yields IoU = 0.8197. **Same model, same image, different prompt.**
+**Same model, same image, different prompt — IoU jumps from 0.0012 (centroid) to 0.8197 (bounding box).**
 
 ---
 
@@ -70,11 +72,25 @@ A centroid prompt yields IoU = 0.0012, while a bounding box prompt on the same i
 
 ## 📊 Results
 
-### Per-Strategy Performance
+### Strategy Comparison
+
+Mean IoU per prompt strategy on the iSAID evaluation set (n = 333). Box-based strategies (BPC, BB) form a clear performance tier above all five point-based strategies.
+
+<p align="center">
+<img src="figures/Fig4_Strategy_Comparison.png" alt="Strategy comparison" width="80%"/>
+</p>
+
+### Confidence vs IoU Calibration
+
+Self-predicted SAM confidence versus mean IoU for each prompt strategy. Point-based strategies cluster in the high-confidence, low-IoU region, illustrating SAM's calibration gap under sparse prompts.
+
+<p align="center">
+<img src="figures/Fig5_Confidence_IoU.png" alt="Confidence vs IoU" width="80%"/>
+</p>
+
+### Per-Strategy Performance Table
 
 Evaluation on 333 iSAID instances across 15 categories, 2,331 SAM inferences, ViT-H at 1024×1024, seed = 42.
-
-![Strategy Comparison](figures/Fig4_Strategy_Comparison.png)
 
 | Strategy | mIoU | 95% CI | Precision | Recall | F1 | Time (ms) |
 |:---------|:----:|:------:|:---------:|:------:|:--:|:---------:|
@@ -85,12 +101,6 @@ Evaluation on 333 iSAID instances across 15 categories, 2,331 SAM inferences, Vi
 | MP3 | 0.122 | [0.108, 0.137] | 0.144 | 0.847 | 0.224 | 12.23 |
 | CP | 0.112 | [0.098, 0.127] | 0.131 | 0.852 | 0.211 | 31.17 |
 | CPC | 0.099 | [0.087, 0.112] | 0.108 | 0.847 | 0.182 | 12.78 |
-
-### Confidence vs IoU
-
-SAM's self-predicted confidence does not correlate well with actual IoU under point prompts. Box-based strategies sit in the high-IoU region with moderate confidence.
-
-![Confidence vs IoU](figures/Fig5_Confidence_IoU.png)
 
 ### Statistical Comparisons
 
@@ -106,10 +116,6 @@ All eight pairwise comparisons reach the Bonferroni-corrected threshold (p < 0.0
 | BB vs MP3 | +0.250 | **1.03** | Large |
 | BB vs MP10 | +0.221 | **0.84** | Large |
 | BPC vs BB | +0.063 | **0.44** | Small-Medium |
-
-### IoU Distribution Heatmap
-
-![IoU Distribution](iou_distribution_heatmap.png)
 
 ---
 
@@ -128,14 +134,13 @@ SAM-Prompt-Comparisonfor/
 │   ├── statistical_analysis.py        # Cohen's d, Bonferroni, bootstrap
 │   └── create_paper_figures.py        # Generate paper figures
 │
+├── 📂 experiments/                    # Experiment configurations
+├── 📂 experiment_results/             # Per-experiment outputs
+├── 📂 results/                        # Aggregated results & CSVs
 ├── 📂 figures/                        # Paper figures
 │   ├── Fig1_Motivation_Teaser.png
 │   ├── Fig4_Strategy_Comparison.png
 │   └── Fig5_Confidence_IoU.png
-│
-├── 📂 experiments/                    # Experiment configurations
-├── 📂 experiment_results/             # Per-experiment outputs
-├── 📂 results/                        # Aggregated results & CSVs
 ├── 📂 utils/                          # Helper utilities
 ├── 📂 data/                           # Data preparation scripts
 └── 📂 sample_data/iSAID_sample/       # Sample data for testing
@@ -165,21 +170,10 @@ cd SAM-Prompt-Comparisonfor
 pip install -r requirements.txt
 ```
 
-Or manually:
-
-```bash
-pip install torch torchvision opencv-python pandas numpy tqdm
-pip install pycocotools matplotlib scipy
-pip install git+https://github.com/facebookresearch/segment-anything.git
-```
-
 ### Step 3: Download SAM checkpoints
 
 ```bash
-# ViT-H (used in main experiments)
 wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
-
-# ViT-B (used in backbone ablation)
 wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth
 ```
 
@@ -187,46 +181,23 @@ wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth
 
 Visit the official iSAID page: **https://captain-whu.github.io/iSAID/**
 
-Download train and val splits with COCO-format annotations. Place them in the `data/` folder.
-
 ---
 
 ## 🚀 Quick Start
-
-### Run the full experiment
 
 ```bash
 python SAM_FINAL_EXPERIMENT.py
 ```
 
-This runs all six phases of the experiment:
-
-| Phase | Description | Output |
-|:-----:|:-----------|:-------|
-| 1 | Build experiment plan (333 instances, 15 categories) | `experiment_plan.json` |
-| 2 | Main experiment (7 strategies × 333 instances) | `raw_results_full15.csv` |
-| 3 | Ablation A1: Backbone (ViT-H vs ViT-B) | `Ablation_A1_Backbone.csv` |
-| 4 | Ablation A2: Resolution (512/768/1024) | `Ablation_A2_Resolution.csv` |
-| 5 | Ablation A3: Bounding box noise | `Ablation_A3_BoxNoise.csv` |
-| 6 | Statistical analysis (Bonferroni, Cohen's d, bootstrap) | `Table_II_Overall.csv`, `Table_III_Stats.csv` |
-
-**Expected runtime:** 75–90 minutes on RTX 3090.
+This runs all six phases of the experiment. **Expected runtime:** 75–90 minutes on RTX 3090.
 
 > 💡 **Note:** The script is resumable. If interrupted, just re-run and it continues from the last checkpoint.
-
-### Generate paper figures
-
-```bash
-python create_paper_figures.py
-```
 
 ---
 
 ## 🔄 Reproducing Results
 
 All results in the paper are reproducible with the fixed random seed (42).
-
-After running `SAM_FINAL_EXPERIMENT.py`, the following CSVs match the numbers in the paper:
 
 | Paper Reference | CSV File |
 |:----------------|:---------|
@@ -236,15 +207,9 @@ After running `SAM_FINAL_EXPERIMENT.py`, the following CSVs match the numbers in
 | Section IV-C, Ablation A2 | `results/Ablation_A2_Resolution.csv` |
 | Section IV-C, Ablation A3 | `results/Ablation_A3_BoxNoise.csv` |
 
-### Sampling Note
-
-The 333 evaluation instances are the **25 largest instances per category**. This choice ensures prompt-mask correspondence is meaningful and visible. Performance on smaller or occluded instances may differ. See the Limitations section of the paper for further discussion.
-
 ---
 
 ## 📝 Citation
-
-If you use this code or build on this work, please cite our paper:
 
 ```bibtex
 @article{tarif2026sam,
@@ -263,7 +228,7 @@ If you use this code or build on this work, please cite our paper:
 
 - **[iSAID benchmark](https://captain-whu.github.io/iSAID/)** by the CAPTAIN laboratory, Wuhan University
 - **[Segment Anything Model](https://github.com/facebookresearch/segment-anything)** by Meta AI Research
-- **[DOTA dataset](https://captain-whu.github.io/DOTA/)** (which iSAID builds upon)
+- **[DOTA dataset](https://captain-whu.github.io/DOTA/)**
 
 ---
 
@@ -274,13 +239,11 @@ If you use this code or build on this work, please cite our paper:
 | First Author | Mehreen Tarif | mehreentarif17@gmail.com |
 | Corresponding Author | Wu Xu | wuxu2022@cdut.edu.cn |
 
-For questions about the code or paper, please open an [Issue](https://github.com/Mehreen-Tarif/SAM-Prompt-Comparisonfor/issues) or contact the authors directly.
-
 ---
 
 ## 📜 License
 
-This code is released under the [MIT License](LICENSE) for research and reproducibility purposes.
+MIT License — see [LICENSE](LICENSE) file.
 
 ---
 
